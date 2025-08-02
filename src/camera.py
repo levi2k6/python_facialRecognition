@@ -40,7 +40,7 @@ def cameraCapture():
                 print(f"Captured photo: {filename}")
                 captured = True
             else:
-                print("Angle not valid");
+                print("Angle not valid")
 
         else:
             captured = False
@@ -48,9 +48,10 @@ def cameraCapture():
         cv2.imshow("Webcam", frame)
 
         if ( cv2.waitKey(1) & 0xFF == ord("q") ) or captured == True:
-            credentialFace = frame;
+            credentialFace = rgbImage
             break
+
     capture.release()
     cv2.destroyAllWindows()
-    return credentialFace;
+    return credentialFace
 

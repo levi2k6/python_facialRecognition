@@ -1,15 +1,9 @@
-import faceRecognition;
-import camera;
-
-image1 = "../assets/ryan_gosling.jpg";
-image2 = "../assets/forsen_crossArm.webp";
+import menu
 
 def main():
+    menu.start()
+    
 
-    credentialFace = camera.cameraCapture();
-    faceRecognition.authenticateFace(credentialFace);
-
-main();
-
+main()
 
 
