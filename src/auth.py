@@ -1,44 +1,78 @@
 import face_recognition
+import faiss
 import cv2 
 import camera
-from myTypes import Person 
-
-import database 
+import uuid
+import numpy as np
+from myTypes import Person, Face
+from controller import PersonController 
+from dataManager import faceData
 
 image1 = "../assets/reference2.jpg"
 image2 = "../assets/capture_1754057623.jpg"
 
 def authenticate( ):
-    nameInput = input()
+    nameInput = input("Input name: ")
     camFace = camera.cameraCapture()
 
-    print("camFace: ", camFace)
+    print("camFace", camFace)
 
-    user = database.getUser(nameInput)
+    faceEncodings = face_recognition.face_encodings(camFace)[0]
+    if len(faceEncodings) == 0:
+        print("No encodings found.")
+        return
+    faceEncodings = np.expand_dims(faceEncodings.astype(np.float32), axis=0)
+    faceAuth = faceData.searchFace(faceEncodings)
 
-    if user:
-        face1_encoding = face_recognition.face_encodings(camFace)[0]
+    print("face_id: ", faceAuth.id)
+    print("face_distance: ", faceAuth.distance)
 
-        results = face_recognition.compare_faces([face1_encoding], user.face)
-        face_distance = face_recognition.face_distance([face1_encoding], user.face)
+    if faceAuth:
 
-        if results[0]:
+        person = PersonController.getPersonById(faceAuth.id)
+
+        if person.face_id == faceAuth.id and person.name == nameInput:
             print("face matched")
+            print("face distance: ", faceAuth.distance)
+            print(f"Hello {person.name}, you are successfully logged in.")
+        elif person.face_id != faceAuth.id:
+            print(f"{person.face_id} is not equal to {faceAuth.id}")
+        elif person.name != nameInput:
+            print(f"{person.name} is not equal to {nameInput}")
         else:
             print("face does not match")
- 
-        print("face distance: ", face_distance[0])
+
     else:
-        print("user not found")
+        print("person not found")
         return
 
 def register():
 
-    userInput = input("Enter name: ")
+    nameInput = input("Enter name: ")
     camFace = camera.cameraCapture()
 
-    face_encoding = face_recognition.face_encodings(camFace) 
-    person = Person(userInput, face_encoding)
+    print("camFace: ", camFace)
 
-    database.addPerson(person)
+    faceEncodings = face_recognition.face_encodings(camFace)[0]
+    if len(faceEncodings) == 0:
+        print("No encodings found.")
+        return
+    faceEncodings = np.expand_dims(faceEncodings.astype(np.float32), axis=0)
+    faceAuth = faceData.searchFace(faceEncodings)
+
+    print("faceAuth: ", faceAuth)
+
+    if faceAuth:
+        if faceAuth.distance < 0.5:
+            print("User already exist.")
+            return
+        print("User exist but face distance is wrong?")
+
+    myUuid = str(uuid.uuid4())
+    person = Person(id = myUuid, name = nameInput, face_id = None, face = None)
+    PersonController.addPerson(person)
+    personDb = PersonController.getPersonByName(nameInput)
+    face = Face(id = personDb.face_id, data = faceEncodings)
+    faceData.addFace(face)
+    print("Register success")
 

@@ -10,10 +10,19 @@ class FaceAngle:
     roll: float
 
 @dataclass
+class FaceAuth:
+    id: int
+    distance: float 
+
+@dataclass
+class Face:
+    id: int 
+    data: npt.NDArray[np.float32]
+
+@dataclass
 class Person:
+    id: str 
     name: str
-    face: npt.NDArray[np.float32]
-
-
-
+    face_id: Optional[int] 
+    face: Optional[Face]
 

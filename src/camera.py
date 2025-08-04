@@ -3,14 +3,12 @@ import time
 
 import faceAngleChecker 
 
-capture = cv2.VideoCapture(0)
-
 captured = False
-
 credentialFace = None 
 
 def cameraCapture():
 
+    capture = cv2.VideoCapture(0)
     global captured
     global credentialFace
 
